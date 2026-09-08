@@ -1,26 +1,27 @@
 {
-  "builds": [
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "backend"
+    }
+  },
+  "rewrites": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "source": "/api(/.*)?",
+      "destination": { "type": "service", "service": "backend" }
     },
     {
-      "src": "backend/api/index.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": { "type": "service", "service": "frontend" }
     }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "backend/api/index.js" },
-    { "src": "/(.*)", "dest": "/frontend/dist/$1" }
   ],
   "env": {
-    "NEON_DATA_API_URL": "https://ep-icy-sunset-ark9pqap.apirest.c-4.us-west-2.aws.neon.tech/networking_tracker/rest/v1"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_NEON_AUTH_URL": "https://ep-icy-sunset-ark9pqap.neonauth.c-4.us-west-2.aws.neon.tech/networking_tracker/auth",
-      "NEXT_PUBLIC_NEON_DATA_API_URL": "https://ep-icy-sunset-ark9pqap.apirest.c-4.us-west-2.aws.neon.tech/networking_tracker/rest/v1"
-    }
+    "NEON_DATA_API_URL": "https://ep-icy-sunset-ark9pqap.apirest.c-4.us-west-2.aws.neon.tech/networking_tracker/rest/v1",
+    "NEXT_PUBLIC_NEON_AUTH_URL": "https://ep-icy-sunset-ark9pqap.neonauth.c-4.us-west-2.aws.neon.tech/networking_tracker/auth",
+    "NEXT_PUBLIC_NEON_DATA_API_URL": "https://ep-icy-sunset-ark9pqap.apirest.c-4.us-west-2.aws.neon.tech/networking_tracker/rest/v1"
   }
 }
