@@ -1,6 +1,7 @@
-// Vercel serverless entry point. Wrapped in an explicit function literal (rather than
-// re-exporting the Express app object directly) so Vercel's Node runtime unambiguously
-// detects a (req, res) request handler, regardless of how it statically analyzes the export.
-const app = require('../src/app');
+// Vercel serverless entry point. Vercel's bundler sometimes wraps a CommonJS module's
+// export under a `default` key during ESM interop, so handle both shapes defensively
+// rather than assuming `require(...)` returns the Express app directly.
+const mod = require('../src/app');
+const app = typeof mod === 'function' ? mod : mod.default;
 
 module.exports = (req, res) => app(req, res);
