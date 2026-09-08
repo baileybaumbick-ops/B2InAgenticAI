@@ -216,11 +216,16 @@ See [Testing](#testing) above — 7/7 passing.
 
 ### Sign-in / sign-out
 
-Verified on the live app: signing in as `test-a@example.com` lands on the dashboard ("Signed in as test-a@example.com"), and Sign out returns cleanly to the sign-in screen. _Screenshots: `docs/screenshots/sign-in.png`, `docs/screenshots/sign-out.png` — see note below._
+Signing in lands on the dashboard with the contacts table; signing out returns cleanly to the sign-in screen.
+
+![Sign in](docs/screenshots/sign-in.png)
+![Sign out](docs/screenshots/sign-out.png)
 
 ### Create, edit, delete, and refresh a contact
 
-Verified on the live app: created "Grace Hopper" (US Navy), confirmed it appears in the table with a colored priority badge, refreshed the browser and confirmed the contact and the signed-in session both survive the reload (proving it's persisted in Neon Postgres, not local state), then deleted it and confirmed the empty state returns. _Screenshot: `docs/screenshots/crud-refresh.png`._
+A contact ("Adeline Lalor," ServiceNow) created through the "Add contact" form, shown here after a full browser refresh — proof it's persisted in Neon Postgres, not local/session state.
+
+![A contact surviving a page refresh](docs/screenshots/crud-refresh.png)
 
 ### Two-account isolation (User A cannot access User B's contacts)
 
@@ -248,11 +253,15 @@ GET /api/contacts  (as A)
 → 200 [{"id":"fab93325-...","name":"Alice Aardvark", ...}]   # unchanged
 ```
 
-B's requests aren't rejected because of an `if` statement in Express — the backend forwards B's own JWT to the Data API exactly like it would for any request, and Postgres Row-Level Security silently filters out rows B doesn't own, so B's `UPDATE`/`DELETE` match zero rows. The backend turns "zero rows matched" into a 404 rather than a misleading success. _Screenshot: `docs/screenshots/two-account-isolation.png`._
+B's requests aren't rejected because of an `if` statement in Express — the backend forwards B's own JWT to the Data API exactly like it would for any request, and Postgres Row-Level Security silently filters out rows B doesn't own, so B's `UPDATE`/`DELETE` match zero rows. The backend turns "zero rows matched" into a 404 rather than a misleading success.
 
 ### Invalid input fails safely
 
-Verified on the live app: submitting the "Add contact" form with an empty name shows "Name is required." inline, without submitting. The backend independently rejects the same cases:
+Submitting the "Add contact" form with an empty name shows "Name is required." inline, without submitting:
+
+![Empty name rejected inline](docs/screenshots/invalid-input.png)
+
+The backend independently rejects the same cases, so a request that bypassed the frontend entirely would still fail safely:
 
 ```
 POST /api/contacts  {"name": "   "}
@@ -261,7 +270,3 @@ POST /api/contacts  {"name": "   "}
 POST /api/contacts  {"name": "X", "priority": "urgent"}
 → 400 {"error":"Priority must be one of: high, medium, low."}
 ```
-
-_Screenshot: `docs/screenshots/invalid-input.png`._
-
-> **Note on screenshots:** the four `docs/screenshots/*.png` files referenced above should be added by opening the live URL and capturing each moment described (sign-in, the contacts table with a contact in it, the two-account test result, and the empty-name error). The flows themselves have been verified end-to-end against production as described above.
