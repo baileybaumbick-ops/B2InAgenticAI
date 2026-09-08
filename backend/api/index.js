@@ -1,3 +1,6 @@
-// Vercel serverless entry point. Express apps are callable as (req, res) handlers,
-// so exporting the app directly (no app.listen here) is all @vercel/node needs.
-module.exports = require('../src/app');
+// Vercel serverless entry point. Wrapped in an explicit function literal (rather than
+// re-exporting the Express app object directly) so Vercel's Node runtime unambiguously
+// detects a (req, res) request handler, regardless of how it statically analyzes the export.
+const app = require('../src/app');
+
+module.exports = (req, res) => app(req, res);
