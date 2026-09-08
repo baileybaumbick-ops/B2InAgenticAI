@@ -5,17 +5,28 @@
 // same request-handling logic.
 require('dotenv').config();
 const express = require('express');
-const { NeonPostgrestClient, fetchWithToken } = require('@neondatabase/postgrest-js');
 
 const NEON_DATA_API_URL = process.env.NEON_DATA_API_URL;
 if (!NEON_DATA_API_URL) {
   throw new Error('Missing required env var NEON_DATA_API_URL.');
 }
 
+// @neondatabase/postgrest-js ships ESM-only. require() works on newer local Node
+// versions (transparent require(esm) support) but fails with ERR_REQUIRE_ESM on
+// Vercel's runtime. Dynamic import() works everywhere, so cache the module promise.
+let postgrestModulePromise;
+function loadPostgrestModule() {
+  if (!postgrestModulePromise) {
+    postgrestModulePromise = import('@neondatabase/postgrest-js');
+  }
+  return postgrestModulePromise;
+}
+
 // Factory, not a singleton — see backend/src/lib/dataApiClient.js for why: a shared
 // client with mutable token state would risk one user's request running with another
 // user's token under Node's concurrent event loop.
-function contactsClientFor(token) {
+async function contactsClientFor(token) {
+  const { NeonPostgrestClient, fetchWithToken } = await loadPostgrestModule();
   return new NeonPostgrestClient({
     dataApiUrl: NEON_DATA_API_URL,
     options: { global: { fetch: fetchWithToken(async () => token) } },
@@ -96,7 +107,7 @@ contactsRouter.get('/', async (req, res) => {
     return res.status(400).json({ error: 'sortDir must be "asc" or "desc".' });
   }
 
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   let query = client.from('contacts').select('*').order(sortBy, { ascending: sortDir === 'asc' });
   if (priority) query = query.eq('priority', priority);
   if (company) query = query.ilike('company', `%${company}%`);
@@ -108,14 +119,14 @@ contactsRouter.get('/', async (req, res) => {
 });
 
 contactsRouter.post('/', validateContact({ requireName: true }), async (req, res) => {
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   const { data, error } = await client.from('contacts').insert(pickWritable(req.body)).select().single();
   if (error) return res.status(dataApiErrorStatus(error)).json({ error: error.message });
   res.status(201).json(data);
 });
 
 contactsRouter.put('/:id', validateContact({ requireName: false }), async (req, res) => {
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   const { data, error } = await client
     .from('contacts')
     .update(pickWritable(req.body))
@@ -127,7 +138,7 @@ contactsRouter.put('/:id', validateContact({ requireName: false }), async (req, 
 });
 
 contactsRouter.delete('/:id', async (req, res) => {
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   const { data, error } = await client.from('contacts').delete().eq('id', req.params.id).select();
   if (error) return res.status(dataApiErrorStatus(error)).json({ error: error.message });
   if (!data || data.length === 0) return res.status(404).json({ error: 'Contact not found.' });

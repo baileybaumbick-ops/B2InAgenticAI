@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     return res.status(400).json({ error: 'sortDir must be "asc" or "desc".' });
   }
 
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   let query = client.from('contacts').select('*').order(sortBy, { ascending: sortDir === 'asc' });
 
   if (priority) query = query.eq('priority', priority);
@@ -49,14 +49,14 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', validateContact({ requireName: true }), async (req, res) => {
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   const { data, error } = await client.from('contacts').insert(pickWritable(req.body)).select().single();
   if (error) return res.status(dataApiErrorStatus(error)).json({ error: error.message });
   res.status(201).json(data);
 });
 
 router.put('/:id', validateContact({ requireName: false }), async (req, res) => {
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   const { data, error } = await client
     .from('contacts')
     .update(pickWritable(req.body))
@@ -71,7 +71,7 @@ router.put('/:id', validateContact({ requireName: false }), async (req, res) => 
 });
 
 router.delete('/:id', async (req, res) => {
-  const client = contactsClientFor(req.token);
+  const client = await contactsClientFor(req.token);
   const { data, error } = await client.from('contacts').delete().eq('id', req.params.id).select();
   if (error) return res.status(dataApiErrorStatus(error)).json({ error: error.message });
   if (!data || data.length === 0) return res.status(404).json({ error: 'Contact not found.' });
