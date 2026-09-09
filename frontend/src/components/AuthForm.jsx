@@ -35,7 +35,16 @@ export function AuthForm({ onSignedIn }) {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-8 bg-muted/40 p-4">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold tracking-tight">
+          K<span className="text-primary">I</span>T
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Keep In Touch — a simple way to stay connected with the people in your network.
+        </p>
+      </div>
+
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>{isSignUp ? 'Create an account' : 'Sign in'}</CardTitle>
