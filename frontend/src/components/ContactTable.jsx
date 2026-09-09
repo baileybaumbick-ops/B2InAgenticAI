@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const PRIORITY_STYLES = {
-  high: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
-  medium: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  low: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  high: 'bg-red-500/20 text-red-300',
+  medium: 'bg-amber-500/20 text-amber-300',
+  low: 'bg-white/10 text-white/70',
 }
 
 function PriorityBadge({ priority }) {

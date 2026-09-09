@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.3.0",
     "@neondatabase/neon-js": "^0.7.0-beta",
     "@tailwindcss/vite": "^4.3.3",
     "class-variance-authority": "^0.7.1",
